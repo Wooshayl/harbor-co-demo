@@ -525,18 +525,22 @@
   });
 
   // Make both "Start a project" buttons open the floating chat.
-  // @n8n/chat doesn't expose an official open() function, so this clicks
-  // the widget's own toggle button (the only <button> inside its mount
-  // point before the window is opened). Falls back to scrolling to the
-  // Contact section if the widget hasn't finished loading yet.
+  // @n8n/chat doesn't expose an official open() function, so this simulates
+  // a real click on the widget's own toggle bubble. Falls back to scrolling
+  // to the Contact section if the toggle can't be found.
   document.querySelectorAll('.start-project-btn').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
-      const toggle = document.querySelector('#n8n-chat button');
+      const toggle = document.querySelector(
+        '#n8n-chat button, #n8n-chat [role="button"], #n8n-chat [class*="toggle" i]'
+      );
       if (toggle) {
         e.preventDefault();
-        toggle.click();
+        ['pointerdown', 'mousedown', 'mouseup', 'click'].forEach(function (type) {
+          toggle.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
+        });
+      } else {
+        console.warn('Harbor & Co.: chat toggle not found inside #n8n-chat — right-click the round chat bubble, choose Inspect, and check its tag/class.');
       }
-      // else: let the default #contact anchor link happen as a fallback
     });
   });
 </script>
