@@ -525,21 +525,18 @@
   });
 
   // Make both "Start a project" buttons open the floating chat.
-  // @n8n/chat doesn't expose an official open() function, so this simulates
-  // a real click on the widget's own toggle bubble. Falls back to scrolling
-  // to the Contact section if the toggle can't be found.
+  // Confirmed via devtools: the toggle is a <div class="chat-window-toggle">
+  // inside #n8n-chat, not a <button>. We dispatch a real click on it so
+  // Vue's own internal open/close state updates normally.
   document.querySelectorAll('.start-project-btn').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
-      const toggle = document.querySelector(
-        '#n8n-chat button, #n8n-chat [role="button"], #n8n-chat [class*="toggle" i]'
-      );
+      const toggle = document.querySelector('#n8n-chat .chat-window-toggle');
       if (toggle) {
         e.preventDefault();
-        ['pointerdown', 'mousedown', 'mouseup', 'click'].forEach(function (type) {
-          toggle.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
-        });
+        console.log('Harbor & Co.: chat toggle found, clicking it now.', toggle);
+        toggle.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       } else {
-        console.warn('Harbor & Co.: chat toggle not found inside #n8n-chat — right-click the round chat bubble, choose Inspect, and check its tag/class.');
+        console.warn('Harbor & Co.: .chat-window-toggle not found inside #n8n-chat.');
       }
     });
   });
